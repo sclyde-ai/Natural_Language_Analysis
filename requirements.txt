@@ -1,0 +1,9 @@
+jupyter
+ipykernel
+numpy
+pandas
+scipy
+matplotlib
+japanize-matplotlib
+
+google-ngrams
