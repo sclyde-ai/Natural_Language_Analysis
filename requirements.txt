@@ -5,5 +5,7 @@ pandas
 scipy
 matplotlib
 japanize-matplotlib
+requests
 
-google-ngrams
+google-pygram
+# google-ngrams
