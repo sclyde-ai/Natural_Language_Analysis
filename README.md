@@ -1,5 +1,14 @@
-# Natural_Language_Analysis
+# how to use
+- make  venv
+```
+./make_venv.sh
+```
+- ETL
+```
+./.venv/bin/python3.12 ETL_data.py
+```
 
+# link
 - google ngram
     https://books.google.com/ngrams/
 
