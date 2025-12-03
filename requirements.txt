@@ -7,5 +7,5 @@ matplotlib
 japanize-matplotlib
 requests
 
-google-pygram
+# google-pygram
 # google-ngrams
