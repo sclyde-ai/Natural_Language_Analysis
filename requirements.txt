@@ -4,8 +4,9 @@ numpy
 pandas
 scipy
 matplotlib
-japanize-matplotlib
-requests
 
-# google-pygram
-# google-ngrams
+gensim
+
+google-ngram-downloader
+google-pygram
+google-ngrams
