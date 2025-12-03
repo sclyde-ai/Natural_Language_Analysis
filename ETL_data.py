@@ -60,8 +60,8 @@ def load_time_series(start=0, end=None, limit=None):
 def all_concat():
     dir_path = Path("./data")
     df_list = [pd.read_csv(file) for file in dir_path.glob("*.csv")]
-    combined_df = pd.concat(df_list, ignore_index=True)
-    combined_df.to_csv("./data/time_series.csv")
+    combined_df = pd.concat(df_list, ignore_index=True, axis=1)
+    combined_df.to_csv("./data/_time_series.csv")
 
 if __name__ == "__main__":
     # load_time_series(limit=512)
