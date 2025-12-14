@@ -4,9 +4,14 @@ numpy
 pandas
 scipy
 matplotlib
+seaborn
+japanize-matplotlib
 
 gensim
 
 google-ngram-downloader
 google-pygram
 google-ngrams
+
+pycountry
+Babel
