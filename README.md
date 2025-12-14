@@ -1,12 +1,14 @@
-# how to use
-- make  venv
+# gensim model
 ```
-./make_venv.sh
+word = "country"
+similar = model.ETL_similar(word=word)
+similar.sort_values(ascending=False).head(20)
 ```
-- ETL
-```
-./.venv/bin/python3.12 ETL_data.py
-```
+
+# country name
+
+# time series
+
 
 # link
 - google ngram
