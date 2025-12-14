@@ -9,6 +9,7 @@ from package.gensim_model import gensim_model
 dictionary = "word2vec-google-news-300"
 model = gensim_model(dictionary)
 ```
+
 - vector取得
 ```
 locale = "en_US"
