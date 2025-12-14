@@ -1,8 +1,12 @@
 jupyter
 ipykernel
+
 numpy
+tensorflow
 pandas
+
 scipy
+
 matplotlib
 seaborn
 japanize-matplotlib

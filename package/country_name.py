@@ -4,6 +4,12 @@ from babel import Locale
 from pathlib import Path
 import os
 from functools import partial
+from pathlib import Path
+
+current_file = Path(__file__)
+current_dir = Path(__file__).parent
+parent_dir = Path(__file__).parent.parent
+data_dir = parent_dir / Path(f"data")
 
 def ETL_pycountry():
     df_list = []
@@ -14,31 +20,36 @@ def ETL_pycountry():
         df_list.append(country_df)
     df = pd.concat(df_list, ignore_index=True)
     df = df.set_index("numeric")
-    df.to_csv("../data/pycountry.csv")
+    pycountry_path = data_dir / Path("pycountry.csv")
+    df.to_csv(pycountry_path)
     return df
 
 def ETL_country_code():
     df = ETL_pycountry()
     df = df.drop(columns=["name", "flag", "official_name", "common_name"])
-    df.to_csv("../data/country_code.csv")
+    country_code_path = data_dir / Path("country_code.csv")
+    df.to_csv(country_code_path)
     return df
 
-def ETL_babel(lang, country_code):
-    code = lang + '_' + country_code
-    locale = Locale.parse(code)
+def ETL_babel(locale):
+    locale = Locale.parse(locale)
     territories = locale.territories
     country_dict = {}
     for alpha_2, name in territories.items():
         if alpha_2.isalpha():
             country_dict[alpha_2] = name
-    series = pd.Series(country_dict, name=code)
-    series.to_csv(f"../data/babel/{lang}_{country_code}.csv")
+    series = pd.Series(country_dict, name=locale)
+    csv_path = data_dir / Path(f"babel/{locale}.csv")
+    series.to_csv(csv_path)
     return series
 
 def ETL_country_name():
-    pycountry_df = pd.read_csv("../data/pycountry.csv", index_col=0)
-    babel = Path("../data/babel")
+    pycountry_path = data_dir / Path("pycountry.csv")
+    pycountry_df = pd.read_csv(pycountry_path, index_col=0)
+
+    babel = data_dir / Path("babel")
     csv_files = list(babel.glob("*.csv"))
+    print(csv_files)
 
     country_name_df = pycountry_df.copy()
     country_name_df = country_name_df.drop(columns=["name", "flag", "official_name", "common_name"])
@@ -47,7 +58,8 @@ def ETL_country_name():
         df = pd.read_csv(file, index_col=0)
         country_name_df = pd.merge(country_name_df, df, left_on="alpha_2", right_index=True)
 
-    country_name_df.to_csv("../data/country_name.csv")
+    country_name_path = data_dir / Path("country_name.csv")
+    country_name_df.to_csv(country_name_path)
     return country_name_df
 
 def get_csv(ETL_func, csv_path):
@@ -58,27 +70,32 @@ def get_csv(ETL_func, csv_path):
     return df
 
 def get_pycountry():
-    df = get_csv(ETL_pycountry, "../data/pycountry.csv")
+    pycountry_path = data_dir / Path("pycountry.csv")
+    df = get_csv(ETL_pycountry, pycountry_path)
     return df
 
 def get_country_code():
-    df = get_csv(ETL_country_code, "../data/country_code.csv")
+    country_code_path = data_dir / Path("country_code.csv")
+    df = get_csv(ETL_country_code, country_code_path)
     return df
 
-def get_babel(lang, country_code):
-    ETL_func = partial(ETL_babel, lang, country_code)
-    df = get_csv(ETL_func, f"../data/babel/{lang}_{country_code}.csv")
+def get_babel(locale):
+    csv_path = data_dir / Path(f"babel/{locale}.csv")
+    ETL_func = partial(ETL_babel, locale)
+    df = get_csv(ETL_func, csv_path)
     return df
 
 def get_country_name():
-    df = get_csv(ETL_country_name, "../data/babel/country_name.csv")
+    country_name_path = data_dir / Path("country_name.csv")
+    df = get_csv(ETL_country_name, country_name_path)
     return df
 
 if __name__ == "__main__":
     ETL_pycountry()
     ETL_country_code()
-    ETL_babel("en", "US")
-    ETL_babel("en", "UK")
-    ETL_babel("zh", "CN")
-    ETL_babel("zh", "TW")
+    US_series = ETL_babel("en_US")
+    UK_series = ETL_babel("en_UK")
+    CN_series = ETL_babel("zh_CN")
+    TW_series = ETL_babel("zh_TW")
     ETL_country_name()
+    print(US_series)
