@@ -1,4 +1,5 @@
 import gensim.downloader as api
+from gensim.models import KeyedVectors
 import pandas as pd
 import numpy as np
 import os
@@ -8,22 +9,37 @@ from functools import partial
 import tensorflow as tf
 from pathlib import Path
 sys.path.append('..')
-from country_name import get_babel, get_country_name
+from .country_name import get_babel, get_country_name
 
 current_file = Path(__file__)
 current_dir = Path(__file__).parent
 parent_dir = Path(__file__).parent.parent
 data_dir = parent_dir / Path(f"data")
 
+info = api.info()
+default_model_list = list(info['models'].keys())
+
 class gensim_model:
-    def __init__(self, dictionary):
-        self.dictionary = dictionary
-        self.dict_path = data_dir / Path(self.dictionary)
+    def __init__(self, model_name):
+        self.model_name = model_name
+        self.dict_path = data_dir / Path(self.model_name)
         if not os.path.exists(self.dict_path):
             os.mkdir(self.dict_path)
-        self.model = api.load(dictionary)
+        self.load_model(model_name)
+        print(self.model)
         self.index = self.get_index()
         print("init complete!")
+
+    def load_model(self, model_name):
+        if model_name in default_model_list:
+            print(model_name)
+            self.model = api.load(model_name)
+        else:
+            self.model = KeyedVectors.load_word2vec_format(
+                'C:/Users/mao_d/.cache/modelscope/hub/models/lili666/text2vec-word2vec-tencent-chinese/light_Tencent_AILab_ChineseEmbedding.bin', # Your local path
+                binary=True
+            )
+        return 
 
     def get_model(self):
         return self.model
@@ -85,6 +101,7 @@ class gensim_model:
         vector_list = []
         size = self.model.vector_size
         for word in series[locale]:
+            word = word.replace(' ', '_')
             if word in self.model:
                 vector_list.append(self.get_vector(word))
             else:

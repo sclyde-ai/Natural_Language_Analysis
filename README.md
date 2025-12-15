@@ -1,3 +1,22 @@
+# usefull code
+```
+def high_corr_pairs(threshold = 1/2):
+    mask = np.triu(np.ones_like(corr_matrix, dtype=bool), k=1)
+    corr_pairs = corr_matrix.where(mask).stack()
+    high_corr_pairs = corr_pairs[corr_pairs.abs() > threshold]
+    return high_corr_pairs
+```
+
+
+# folderの役割
+- data
+    dataを格納する
+- model
+    modelを格納する
+- package
+    package
+
+
 # gensim model
 1. model作成
 ```
@@ -5,9 +24,9 @@ import sys
 sys.path.append('..')
 from package.gensim_model import gensim_model
 
-# 辞書の名前を指定する
-dictionary = "word2vec-google-news-300"
-model = gensim_model(dictionary)
+# modelの名前を指定する
+model_name = "word2vec-google-news-300"
+model = gensim_model(model_name)
 ```
 
 - vector取得
@@ -67,3 +86,7 @@ all_locales
 
 - corpus
     https://app.sketchengine.eu/#open
+    
+- presentation slide
+    
+    https://tusedu-my.sharepoint.com/:p:/r/personal/8723112_ed_tus_ac_jp/_layouts/15/Doc.aspx?sourcedoc=%7B0E304FF3-9737-4C52-AE39-5130F8B5D78D%7D&file=%25u8a00%25u8a9e%25u3068%25u6587%25u5316%25u30d7%25u30ec%25u30bc%25u30f3.pptx&openShare=true&fromShare=true&action=edit&mobileredirect=true
