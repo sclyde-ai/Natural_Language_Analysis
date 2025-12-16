@@ -8,6 +8,7 @@ import seaborn as sns
 from functools import partial
 import tensorflow as tf
 from pathlib import Path
+import matplotlib.pyplot as plt
 sys.path.append('..')
 from .country_name import get_babel, get_country_name
 
@@ -36,7 +37,7 @@ class gensim_model:
             self.model = api.load(model_name)
         else:
             self.model = KeyedVectors.load_word2vec_format(
-                'C:/Users/mao_d/.cache/modelscope/hub/models/lili666/text2vec-word2vec-tencent-chinese/light_Tencent_AILab_ChineseEmbedding.bin', # Your local path
+                model_name,
                 binary=True
             )
         return 
@@ -90,17 +91,28 @@ class gensim_model:
         df = self.get_csv(self.ETL_similar, csv_path)
         return df
 
-    def get_vector(self, word):
+    def get_vector(self, word, columns=None):
         csv_path = self.dict_path / Path(f"vector/{word}.csv")
         ETL_func = partial(self.ETL_vector, word)
         df = self.get_csv(ETL_func, csv_path)
-        return df
-    
-    def get_locale_vector(self, locale):
+        if columns:
+            return df[columns]
+        else:
+            return df
+
+    def get_locle_countries(self, locale):
         series = get_babel(locale)
-        vector_list = []
+        return series[locale]
+    
+    def get_locale_vector(self, locale, countries=None):
         size = self.model.vector_size
-        for word in series[locale]:
+
+        if not countries:
+            series = get_babel(locale)
+            countries = series[locale]
+        
+        vector_list = []
+        for word in countries:
             word = word.replace(' ', '_')
             if word in self.model:
                 vector_list.append(self.get_vector(word))
@@ -109,13 +121,50 @@ class gensim_model:
         df = pd.concat(vector_list, axis=1)
         return df
     
-    def get_locale_corr(self, locale):
-        df = self.get_locale_vector(locale)
-        return df
+    def get_locale_corr(self, locale, countries=None):
+        df = self.get_locale_vector(locale, countries=countries)
+        return df.dropna().dropna(axis=1)
 
-    def show_locale_heatmap(self, locale):
-        df = self.get_locale_corr(locale)
-        sns.heatmap(df.corr())
+    def corr_with_creterion(self, locale, countries=None, threshold = 1/2, above=True):
+        df = self.get_locale_corr(locale, countries=countries)
+        mask = np.triu(np.ones_like(df, dtype=bool), k=1)
+        corr_pairs = df.where(mask).stack()
+        if above:
+            high_corr_pairs = corr_pairs[corr_pairs.abs() > threshold].sort_values(ascending=False)
+        else:
+            high_corr_pairs = corr_pairs[corr_pairs.abs() < threshold].sort_values()
+        
+        if high_corr_pairs.empty:
+            raise Exception("DataFrame is empty")
+        
+        return high_corr_pairs
+
+    def show_locale_heatmap(self, locale, countries=None):
+        df = self.get_locale_corr(locale, countries=countries)
+        width  = df.shape[0]/(3*0.8)
+        height = df.shape[1]/3
+        plt.figure(figsize=(width, height))
+        sns.heatmap(
+            df, 
+            cmap='coolwarm',
+            linewidths=0.5,
+            xticklabels=1,
+            yticklabels=1,
+            )
+    
+    def show_locale_clustermap(self, locale, countries=None):
+        df = self.get_locale_corr(locale, countries=countries)
+        width  = df.shape[0]/3
+        height = df.shape[1]/3
+        plt.figure(figsize=(width, height))
+        sns.clustermap(
+            df, 
+            method='ward', 
+            cmap='coolwarm', 
+            linewidths=0.5,
+            xticklabels=1,
+            yticklabels=1,
+            )
 
     def get_all_locale(self, locale_func):
         country_name_df = get_country_name()
@@ -138,6 +187,7 @@ class gensim_model:
     
 if __name__ == "__main__":
     model = gensim_model("word2vec-google-news-300")
+    print(model.get_all_locale)
     print(model.get_all_locale_tensor())
         
 
